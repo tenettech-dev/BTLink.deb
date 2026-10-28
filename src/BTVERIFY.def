@@ -1,0 +1,7 @@
+LIBRARY BTVERIFY
+EXPORTS
+    SetupDiGetClassDevsA=_SetupDiGetClassDevsA@16
+    SetupDiEnumDeviceInfo=_SetupDiEnumDeviceInfo@12
+    SetupDiGetDeviceRegistryPropertyA=_SetupDiGetDeviceRegistryPropertyA@28
+    SetupDiGetDeviceInstanceIdA=_SetupDiGetDeviceInstanceIdA@20
+    SetupDiDestroyDeviceInfoList=_SetupDiDestroyDeviceInfoList@4

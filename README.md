@@ -25,7 +25,7 @@ Official model list: https://www.konnwei.com/capabilities/Download-Update-Tool.h
 
 For a 64-bit host, ensure **32-bit Wine application support** is installed. For example, Wine 9 from Linux Mint's Wine installer packages has worked; a different Wine distribution may require installing the appropriate `wine32` package. The BTLink application is 32-bit; a 64-bit-only Wine installation is not sufficient.
 
-1. Download `btlink-wine_1.0.0_all.deb` from the [GitHub Releases](https://github.com/tenettech-dev/BTLink.deb/releases), or build it yourself with `bash packaging/build-deb.sh`.
+1. Download [`btlink-wine_1.0.0_all.deb`](dist/btlink-wine_1.0.0_all.deb) from this repository, or build it yourself with `bash packaging/build-deb.sh`. GitHub Actions also builds a downloadable package artifact on every successful run.
 2. Install the bridge package:
 
    ```bash

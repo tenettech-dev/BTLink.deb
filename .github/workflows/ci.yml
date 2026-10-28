@@ -1,0 +1,24 @@
+name: Debian package build and privacy tests
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  test-and-build:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unit tests, privacy audit and .deb build
+        run: bash packaging/build-deb.sh
+      - name: Verify package metadata
+        run: |
+          dpkg-deb -f dist/btlink-wine_1.0.0_all.deb Package
+          dpkg-deb -f dist/btlink-wine_1.0.0_all.deb Version
+          dpkg-deb --contents dist/btlink-wine_1.0.0_all.deb | grep 'BTVERIFY-template.dll'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: btlink-wine-debian
+          path: dist/*.deb
+          if-no-files-found: error
