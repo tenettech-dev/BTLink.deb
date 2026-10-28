@@ -10,6 +10,7 @@ import tempfile
 import time
 from device_guard import discover, verified
 from patch_import import inspect_and_patch
+from vendor_installer import install as install_vendor, InstallerError
 
 BASE = Path(__file__).resolve().parent
 DEFAULT_PREFIX = Path.home() / '.local/share/wineprefixes/btlink'
@@ -82,7 +83,8 @@ def map_port(prefix, tty):
 def setup():
     prefix, bindir, original, target, dll = paths()
     if not original.is_file():
-        raise RuntimeError('Original vendor BTLink.exe not found. Install official KONNWEI BTLink first.')
+        print('Manufacturer BTLink is missing. Choose automatic download, a URL, or an existing installer.')
+        install_vendor(prefix)
     if not (prefix/'dosdevices/z:').is_symlink() or (prefix/'dosdevices/z:').resolve()!=Path('/'):
         raise RuntimeError('Wine Z: must map to /')
     device = discover()
@@ -108,6 +110,11 @@ def setup():
 
 
 def run(check=False):
+    if not check and not paths()[2].is_file():
+        print('Manufacturer BTLink is not installed. Starting first-run installer.')
+        install_vendor(paths()[0])
+        print('Connect the tester and run: btlink-wine --setup')
+        return 0
     prefix, target, dll = check_files()
     device = verified(prefix)
     # Verify the installed DLL belongs to this specific attached unit, not an earlier unit.
@@ -164,16 +171,26 @@ def main():
     p.add_argument('--rollback',action='store_true',help='Remove community EXE and restore earlier local adapter DLL')
     p.add_argument('--setup',action='store_true',help='Configure bridge for currently connected supported USB tester')
     p.add_argument('--check',action='store_true',help='Read-only physical device and Wine check')
+    p.add_argument('--install-btlink', action='store_true', help='Download or select the official Windows BTLink installer')
+    source=p.add_mutually_exclusive_group()
+    source.add_argument('--auto-installer', action='store_true', help='Discover and download from official manufacturer HTTPS pages')
+    source.add_argument('--installer-url', metavar='HTTPS_URL', help='Download from a provided HTTPS URL')
+    source.add_argument('--installer-file', metavar='EXE_PATH', help='Use an existing local BTLink installer file')
+    source.add_argument('--browse-installer', action='store_true', help='Choose BTLink.exe using a graphical file picker')
     args=p.parse_args()
     try:
         if args.rollback:
             rollback()
             return 0
+        if args.install_btlink or args.auto_installer or args.installer_url or args.installer_file or args.browse_installer:
+            mode = ('AUTO' if args.auto_installer else 'BROWSE' if args.browse_installer else None)
+            install_vendor(paths()[0], mode=mode, url=args.installer_url, file=args.installer_file)
+            return 0
         if args.setup:
             setup()
             return 0
         return run(args.check)
-    except (OSError,RuntimeError,ValueError) as exc:
+    except (OSError,RuntimeError,ValueError,InstallerError) as exc:
         print('REFUSED:',exc,file=sys.stderr)
         return 2
 

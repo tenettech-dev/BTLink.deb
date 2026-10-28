@@ -31,8 +31,8 @@ if [[ "$VISIBILITY" != PUBLIC ]]; then
   exit 1
 fi
 bash packaging/build-deb.sh
-if ! gh release view v1.0.0 --repo "$REPO" >/dev/null 2>&1; then
-  gh release create v1.0.0 dist/btlink-wine_1.0.0_all.deb \
-    --repo "$REPO" --title 'BTLink Wine Bridge 1.0.0' --notes-file CHANGELOG.md
+if ! gh release view v1.1.0 --repo "$REPO" >/dev/null 2>&1; then
+  gh release create v1.1.0 dist/btlink-wine_1.1.0_all.deb \
+    --repo "$REPO" --title 'BTLink Wine Bridge 1.1.0' --notes-file CHANGELOG.md
 fi
-printf 'Release: https://github.com/%s/releases/tag/v1.0.0\n' "$REPO"
+printf 'Release: https://github.com/%s/releases/tag/v1.1.0\n' "$REPO"

@@ -5,3 +5,5 @@ KONNWEI BTLink, the original Windows installer, the ArteryTek driver package, Wi
 Official vendor download page: https://www.konnwei.com/capabilities/Download-Update-Tool.html
 
 Wine is a separate open-source compatibility project governed by its own licenses; it is not bundled in this package. This repo is independently developed and is not affiliated with KONNWEI or ArteryTek.
+
+The v1.1.0 installer wizard fetches the manufacturer installer only on user request. It never adds it to this repository or Debian package. The user is responsible for selecting a trusted download source and accepting any vendor license.

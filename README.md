@@ -21,27 +21,48 @@ Official model list: https://www.konnwei.com/capabilities/Download-Update-Tool.h
 
 **Important:** v1.0 is scoped to USB CDC ACM devices reporting **VID `2e3c`, PID `5740`** and a 12-character hardware serial. A model name cannot be inferred from the VID/PID. Other hardware revisions and the other vendor-listed models are *not validated*. Software fails closed if the expected USB interface is absent, ambiguous, or lacks the expected serial format.
 
+## Easy installation: obtain the manufacturer installer inside the app
+
+The `.deb` packages **only the open-source compatibility bridge**, not KONNWEI's copyrighted Windows program. Beginning in **v1.1.0**, users do not have to locate and run the Windows installer manually: the setup wizard handles it.
+
+The installer offers three choices:
+
+1. **Automatic download (default selection)** — checks KONNWEI's official update-tool page and its designated itoscanner download portal for a usable **HTTPS** BTLink `.exe` download. The vendor has not published a confirmed, permanent direct BTLink URL; if the current pages do not provide a compatible executable or are unavailable, automatic download fails safely and the wizard offers another method.
+2. **Direct download URL** — paste the full HTTPS URL of a Windows BTLink installer, such as one supplied by the manufacturer or another source you independently trust. HTTP links are rejected; if the source only supports HTTP, download the file yourself and use Browse. Files are checked for a valid Windows PE header and size before Wine is launched; this is **not an authenticity signature check**. Review the source before consenting to run it.
+3. **Browse local files** — select an already downloaded official `BTlink.exe` installer using a graphical file picker (Zenity, or Tkinter where available). It is a **local file selection**, not an upload to the internet.
+
+The wizard shows the chosen download source and SHA256, and asks before executing the vendor installer. Files downloaded automatically are stored in `~/.cache/btlink-wine/vendor-downloads/` **locally only**. Nothing is bundled, published, or uploaded by this project.
+
+**Run the installer wizard:**
+
+```bash
+sudo apt install ./btlink-wine_1.1.0_all.deb
+btlink-wine --install-btlink
+```
+
+To skip the source-selection menu and directly pick a method:
+
+```bash
+btlink-wine --auto-installer
+btlink-wine --installer-url 'https://manufacturer.example/path/to/BTlink.exe'
+btlink-wine --browse-installer
+btlink-wine --installer-file "$HOME/Downloads/BTlink.exe"
+```
+
+The example URL is a placeholder; use a verified real link. **Nothing is downloaded when the `.deb` itself is installed**; downloads happen only when explicitly starting the wizard or first launch, and the installer requests confirmation before Wine executes the EXE. If the BTLink application is missing when you run `btlink-wine --setup`, setup presents the same installer choices.
+
 ## Install on Debian, Ubuntu or Linux Mint
 
 For a 64-bit host, ensure **32-bit Wine application support** is installed. For example, Wine 9 from Linux Mint's Wine installer packages has worked; a different Wine distribution may require installing the appropriate `wine32` package. The BTLink application is 32-bit; a 64-bit-only Wine installation is not sufficient.
 
-1. Download [`btlink-wine_1.0.0_all.deb`](dist/btlink-wine_1.0.0_all.deb) from this repository, or build it yourself with `bash packaging/build-deb.sh`. GitHub Actions also builds a downloadable package artifact on every successful run.
+1. Download [`btlink-wine_1.1.0_all.deb`](dist/btlink-wine_1.1.0_all.deb) from this repository, or build it yourself with `bash packaging/build-deb.sh`. GitHub Actions also builds a downloadable package artifact on every successful run.
 2. Install the bridge package:
 
    ```bash
-   sudo apt install ./btlink-wine_1.0.0_all.deb
+   sudo apt install ./btlink-wine_1.1.0_all.deb
    ```
 
-3. Obtain the actual **BTLink Windows installer** only from KONNWEI's official download site and install it inside a dedicated 32-bit Wine prefix:
-
-   ```bash
-   export WINEPREFIX="$HOME/.local/share/wineprefixes/btlink"
-   export WINEARCH=win32
-   wineboot -i
-   wine /path/to/official/BTLink-installer.exe
-   ```
-
-   The installer filename is illustrative. Use the actual vendor download filename. **Don't run Microsoft's/ArteryTek's Windows kernel-driver installer** under Linux; `cdc_acm` is the Linux driver.
+3. Run **`btlink-wine --install-btlink`** and choose automatic manufacturer download, paste a direct HTTPS installer link, or browse for an existing BTlink installer. The wizard creates its own 32-bit Wine prefix when needed, verifies the Windows executable format, asks for consent, and runs the manufacturer's installer through Wine. **Do not run the bundled Windows kernel driver installer**; Linux's `cdc_acm` handles the USB connection. If BTLink is already installed in the dedicated prefix, skip this step.
 
 4. Connect a supported tester normally, by USB **without holding any keys**. Check that the kernel presents `/dev/ttyACM0` (or another `ttyACM*`):
 
@@ -85,6 +106,7 @@ Close BTLink and run `btlink-wine --rollback` to remove the community executable
 - `src/BTVERIFY-template.dll`: **generic** 32-bit Windows PE DLL (built from included `btverify.c`) intercepts five Windows SetupAPI enumeration functions. Contains a neutral 12-character placeholder, **not a user's serial**.
 - `src/patch_import.py`: changes the SetupAPI import library name in a *local copy* of the vendor application; checks PE32 and expected imported functions before modifying.
 - `src/device_guard.py`: discovers a real, currently attached Linux USB device, checks VID/PID and reads its serial locally.
+- `src/vendor_installer.py`: obtains the manufacturer installer from official HTTPS pages where available, user-supplied HTTPS URL, or a local file picker, then runs it in a user-local Wine prefix with consent.
 - `src/main.py`: performs setup, maps Wine COM3 to the correct Linux tty, injects the device serial only into a locally generated adapter DLL, starts Wine and monitors disconnects. It does not send firmware commands.
 - `packaging/build-deb.sh`: creates the installable `.deb` and runs privacy and unit tests.
 
@@ -94,7 +116,7 @@ Close BTLink and run `btlink-wine --rollback` to remove the community executable
 PYTHONPATH=src python3 -m unittest discover -s tests -p 'test_*.py' -v
 python3 scripts/privacy_audit.py
 bash packaging/build-deb.sh
-sudo apt install ./dist/btlink-wine_1.0.0_all.deb
+sudo apt install ./dist/btlink-wine_1.1.0_all.deb
 ```
 
 Precompiled generic DLL included for easy installation; to rebuild on a developer's machine with 32-bit MinGW-w64, see [Building the DLL](docs/BUILDING.md).
@@ -107,9 +129,13 @@ Precompiled generic DLL included for easy installation; to rebuild on a develope
 
 - `REFUSED: ... not found`: ensure the tester is plugged in and appears as `2e3c:5740` with a `ttyACM*` device. See `docs/USB_PERMISSIONS.md`.
 - `REFUSED: ... COM3`: rerun `btlink-wine --setup` after unplug/replug if Linux assigned a different serial port. The mapping is local to the Wine prefix.
-- Installer says `BTLink.exe not found`: install the manufacturer's Windows BTLink first, in the same Wine prefix. Use an actual vendor installer; this project does not bundle it.
+- Installer says `BTLink.exe not found`: run `btlink-wine --install-btlink` and choose a method. Use an actual vendor installer; this project does not bundle it.
 - Version/layout differs: the PE patcher refuses unsupported application binaries. Open an issue with **sanitized** import names and versions; **do not upload proprietary application binaries or personal serials**.
 - BTLink shows connection but no responses: first try Print mode; a connection label is not proof of bootloader communication.
+
+### Automatic download limitation
+
+KONNWEI directs users to its [official download tool page](https://www.konnwei.com/capabilities/Download-Update-Tool.html), which refers to `itoscanner.com`. As of this release we could not verify a stable, HTTPS direct `.exe` download URL. The automatic option actively checks the official pages at setup time and only downloads a discoverable vendor-hosted HTTPS Windows installer; **it will not guess URLs, download an unrelated UPLINK installer, or silently switch to an untrusted mirror**. Use the direct URL or file-picker fallback if the official site is down or doesn't publish a usable direct link.
 
 ## License
 

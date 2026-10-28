@@ -13,8 +13,9 @@ allowed = {
     'packaging/build-deb.sh', 'scripts/privacy_audit.py',
     'scripts/publish-github.sh',
     'src/BTVERIFY-template.dll', 'src/BTVERIFY.def', 'src/btverify.c',
-    'src/device_guard.py', 'src/main.py', 'src/patch_import.py',
+    'src/device_guard.py', 'src/main.py', 'src/patch_import.py', 'src/vendor_installer.py',
     'tests/test_device_guard.py', 'tests/test_patcher.py', 'tests/test_template.py',
+    'tests/test_vendor_installer.py',
 }
 forbidden=[
     (b'PRIVATE KEY-----', 'possible private key'),
