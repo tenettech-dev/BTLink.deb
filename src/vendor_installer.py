@@ -26,6 +26,10 @@ class InstallerError(RuntimeError):
     pass
 
 
+class UserCancelled(InstallerError):
+    pass
+
+
 class Links(HTMLParser):
     def __init__(self):
         super().__init__()
@@ -174,7 +178,7 @@ def file_picker():
                                text=True, capture_output=True)
             if p.returncode == 0 and p.stdout.strip():
                 return Path(p.stdout.strip()).expanduser()
-            raise InstallerError('File selection cancelled.')
+            raise UserCancelled('File selection cancelled.')
         try:
             import tkinter as tk
             from tkinter import filedialog
@@ -184,14 +188,14 @@ def file_picker():
             root.destroy()
             if selected:
                 return Path(selected)
-            raise InstallerError('File selection cancelled.')
+            raise UserCancelled('File selection cancelled.')
         except ImportError:
             pass
     if not sys.stdin.isatty():
         raise InstallerError('No graphical file picker found. Use --installer-file /path/to/BTlink.exe')
     path = input('Enter the path to the official BTLink installer (.exe): ').strip().strip('"\'')
     if not path:
-        raise InstallerError('No installer selected.')
+        raise UserCancelled('No installer selected.')
     return Path(path).expanduser()
 
 
@@ -209,7 +213,7 @@ def choose_source():
         p = subprocess.run(cmd,text=True,capture_output=True)
         if p.returncode == 0 and p.stdout.strip() in options:
             return p.stdout.strip()
-        raise InstallerError('Installation cancelled.')
+        raise UserCancelled('Installation cancelled.')
     if not sys.stdin.isatty():
         raise InstallerError('Interactive selection requires a terminal or Zenity. Use --auto-installer, --installer-url, or --installer-file.')
     print('\nChoose how to obtain the official KONNWEI BTLink installer:')
@@ -225,7 +229,7 @@ def ask_url():
                            text=True,capture_output=True)
         if p.returncode == 0 and p.stdout.strip():
             return p.stdout.strip()
-        raise InstallerError('No URL provided.')
+        raise UserCancelled('No URL provided.')
     if not sys.stdin.isatty():
         raise InstallerError('Use --installer-url https://example.com/BTlink.exe')
     return input('Paste the HTTPS download URL: ').strip()
@@ -291,7 +295,7 @@ def install(prefix, mode=None, url=None, file=None, consent_required=True):
             method, address, selected_file = choices.pop(0) if choices is not None else (choose_source(),None,None)
             path, origin = acquire(cache, mode=method, url=address, file=selected_file)
             if consent_required and not consent(path,origin):
-                raise InstallerError('Installation cancelled by user.')
+                raise UserCancelled('Installation cancelled by user.')
             _init_prefix(prefix)
             print('Starting manufacturer BTLink installer under Wine...', flush=True)
             run = subprocess.run(['wine',str(path)],env={**os.environ,'WINEPREFIX':str(prefix)})
@@ -302,6 +306,8 @@ def install(prefix, mode=None, url=None, file=None, consent_required=True):
                 raise InstallerError('Vendor installer exited, but BTLink.exe was not found. Confirm the Wine installation location.')
             print('PASS: Manufacturer BTLink is installed. Connect your tester and run btlink-wine --setup.')
             return installed
+        except UserCancelled:
+            raise
         except (InstallerError, OSError, ValueError) as exc:
             print('Installer option failed:', exc,file=sys.stderr)
             if choices is not None or not (sys.stdin.isatty() or shutil.which('zenity')):
