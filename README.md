@@ -6,6 +6,44 @@ Unofficial **open-source Linux compatibility adapter** and Debian package for th
 
 **This is not KONNWEI BTLink itself.** Install BTLink separately from the manufacturer. Neither the repository nor the `.deb` includes the manufacturer application, drivers, firmware, or update payloads. This project is not endorsed by KONNWEI.
 
+## Quick install — recommended (Linux Mint, Ubuntu, Debian)
+
+**Copy and paste this entire block into a terminal.** It downloads the published `v1.2.0` Debian package from this public GitHub repository, verifies the package name and version, installs it with APT, cleans up the temporary download, and starts the first-run BTLink wizard. **It does not use any personal or developer-specific directory.**
+
+```bash
+(
+set -euo pipefail
+
+echo "Installing KONNWEI BTLink for Linux..."
+
+sudo apt-get install -y curl ca-certificates
+
+TEMP_DIR="$(mktemp -d)"
+trap 'rm -rf "$TEMP_DIR"' EXIT
+
+PACKAGE="$TEMP_DIR/btlink-wine_1.2.0_all.deb"
+
+curl -fL --retry 3 \
+  "https://raw.githubusercontent.com/tenettech-dev/BTLink.deb/main/dist/btlink-wine_1.2.0_all.deb" \
+  -o "$PACKAGE"
+
+test "$(dpkg-deb -f "$PACKAGE" Package)" = "btlink-wine"
+test "$(dpkg-deb -f "$PACKAGE" Version)" = "1.2.0"
+
+sudo apt-get install -y "$PACKAGE"
+
+echo
+echo "BTLink compatibility package installed."
+echo "Starting setup..."
+
+btlink-wine
+)
+```
+
+**Before running:** you need a working Wine installation with **32-bit Windows application support**; this package does not bundle Wine or automatically install KONNWEI's proprietary Windows application during the APT step. If Wine is missing, install 32-bit Wine support using your distribution's documented method and rerun `btlink-wine`. When BTLink starts, the first-run wizard lets you automatically find the manufacturer's installer, paste a direct URL, or browse for an EXE/ZIP/7z/RAR archive. Connect the tester **normally by USB** before bridge configuration. For supported models, see the compatibility table below.
+
+Afterward, start BTLink from the application menu or run `btlink-wine`. To configure a connected tester explicitly, run `btlink-wine --setup` and `btlink-wine --check`.
+
 ## Compatibility — read before installing
 
 | Tester | Vendor lists BTLink? | Tested with this Linux bridge? |
