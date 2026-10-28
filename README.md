@@ -49,7 +49,7 @@ btlink-wine --browse-installer
 btlink-wine --installer-file "$HOME/Downloads/BTlink.exe"
 ```
 
-The example URL is a placeholder; use a verified real link. **Nothing is downloaded when the `.deb` itself is installed**; downloads happen only when explicitly starting the wizard or first launch, and the installer requests confirmation before Wine executes the EXE. If the BTLink application is missing when you run `btlink-wine --setup` or launch the desktop shortcut, setup presents the same installer choices. With a supported USB tester already connected, the desktop shortcut also configures the bridge and starts BTLink after the vendor installer finishes.
+The example URL is a placeholder; use a verified real link. **Nothing is downloaded when the `.deb` itself is installed**; downloads happen only when explicitly starting the wizard or first launch, and the installer requests confirmation before Wine executes the EXE. If the BTLink application is missing when you run `btlink-wine --setup`, setup presents the same installer choices.
 
 ## Install on Debian, Ubuntu or Linux Mint
 

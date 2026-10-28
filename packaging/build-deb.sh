@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VER="${BTLINK_DEB_VERSION:-1.1.0}"
+VER="${BTLINK_DEB_VERSION:-1.2.0}"
 case "$VER" in *[!a-zA-Z0-9.+~:-]*|'') echo 'Invalid version' >&2; exit 1;; esac
 python3 "$ROOT/scripts/privacy_audit.py"
 PYTHONPATH="$ROOT/src" python3 -m unittest discover -s "$ROOT/tests" -p 'test_*.py' -v
@@ -38,11 +38,11 @@ Priority: optional
 Architecture: all
 Maintainer: BTLink Community Contributors <noreply@github.com>
 Depends: python3 (>= 3.8)
-Recommends: wine, usbutils, zenity
+Recommends: wine, usbutils, zenity, 7zip
 Description: Linux Wine bridge for KONNWEI BTLink battery tester tools
  Includes the original open-source compatibility shim, a generic Windows
  SetupAPI adapter DLL, a local-only device authorization step, launcher,
- and USB serial checks. Offers automatic manufacturer download, direct HTTPS URL or local file chooser.
+ and USB serial checks. Offers vendor link discovery, direct URL or local file chooser; supports ZIP/7z/RAR with consent.
  Requires vendor BTLink, obtained directly by the user at setup.
  Does not ship KONNWEI programs, drivers, firmware or tester identities.
 EOF

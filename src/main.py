@@ -176,9 +176,9 @@ def main():
     p.add_argument('--check',action='store_true',help='Read-only physical device and Wine check')
     p.add_argument('--install-btlink', action='store_true', help='Download or select the official Windows BTLink installer')
     source=p.add_mutually_exclusive_group()
-    source.add_argument('--auto-installer', action='store_true', help='Discover and download from official manufacturer HTTPS pages')
-    source.add_argument('--installer-url', metavar='HTTPS_URL', help='Download from a provided HTTPS URL')
-    source.add_argument('--installer-file', metavar='EXE_PATH', help='Use an existing local BTLink installer file')
+    source.add_argument('--auto-installer', action='store_true', help='Discover BTLink from vendor pages and offer a reported HTTP fallback')
+    source.add_argument('--installer-url', metavar='URL', help='Download a Windows installer or ZIP/7z/RAR archive (HTTPS preferred; HTTP requires confirmation)')
+    source.add_argument('--installer-file', metavar='PATH', help='Use an existing local BTLink installer or ZIP/7z/RAR archive')
     source.add_argument('--browse-installer', action='store_true', help='Choose BTLink.exe using a graphical file picker')
     args=p.parse_args()
     try:

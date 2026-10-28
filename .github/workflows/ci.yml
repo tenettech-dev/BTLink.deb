@@ -14,9 +14,9 @@ jobs:
         run: bash packaging/build-deb.sh
       - name: Verify package metadata
         run: |
-          dpkg-deb -f dist/btlink-wine_1.1.0_all.deb Package
-          dpkg-deb -f dist/btlink-wine_1.1.0_all.deb Version
-          dpkg-deb --contents dist/btlink-wine_1.1.0_all.deb | grep 'BTVERIFY-template.dll'
+          dpkg-deb -f dist/btlink-wine_1.2.0_all.deb Package
+          dpkg-deb -f dist/btlink-wine_1.2.0_all.deb Version
+          dpkg-deb --contents dist/btlink-wine_1.2.0_all.deb | grep 'BTVERIFY-template.dll'
       - uses: actions/upload-artifact@v4
         with:
           name: btlink-wine-debian
