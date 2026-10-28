@@ -7,3 +7,7 @@ No telemetry, accounts, advertising, analytics or application-side network calls
 **Never publish:** any test result, USB serial, device photo showing identifying numbers, Wine registry or installed-prefix files, a customized DLL, IP addresses, personal paths, or raw debug logs. The included privacy-audit script checks common mistakes, but it is not a guarantee against every secret. Review all files and commit diffs before making a GitHub repo public.
 
 The installation wizard’s Browse action opens a **local** file picker; it does not upload the selected installer. Automatic or URL downloads are saved locally in a private cache directory and are never copied to GitHub.
+
+## Downloaded archives
+
+Manufacturer installers and archives are held only in a private cache on the local computer. The user selects when downloading or running the manufacturer software. The source URL may appear in local terminal diagnostics. This project does not upload the archive, extracted installer, or reports to GitHub.
