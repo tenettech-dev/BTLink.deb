@@ -110,11 +110,14 @@ def setup():
 
 
 def run(check=False):
-    if not check and not paths()[2].is_file():
-        print('Manufacturer BTLink is not installed. Starting first-run installer.')
-        install_vendor(paths()[0])
-        print('Connect the tester and run: btlink-wine --setup')
-        return 0
+    if not check:
+        prefix, _, orig, community, dll = paths()
+        if not orig.is_file():
+            print('Manufacturer BTLink is not installed. Starting first-run installer.')
+            install_vendor(prefix)
+        if not community.is_file() or not dll.is_file():
+            print('Configuring the bridge for your connected tester...')
+            setup()
     prefix, target, dll = check_files()
     device = verified(prefix)
     # Verify the installed DLL belongs to this specific attached unit, not an earlier unit.
